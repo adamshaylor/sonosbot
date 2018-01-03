@@ -1,0 +1,22 @@
+{
+  "name": "sonosbot",
+  "version": "1.0.0",
+  "description": "A Sonos DJ for Slack",
+  "main": "index.js",
+  "scripts": {
+    "test": "eslint ."
+  },
+  "author": "Adam Shaylor <business@adamshaylor.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/adamshaylor/sonosbot.git"
+  },
+  "dependencies": {
+    "botkit": "^0.6.7",
+    "sonos-discovery": "github:jishi/node-sonos-discovery"
+  },
+  "devDependencies": {
+    "eslint": "^4.14.0"
+  }
+}
