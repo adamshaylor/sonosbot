@@ -6,6 +6,8 @@ const sonosDiscovery = new (require('sonos-discovery'))();
 const sonos = require('sonos');
 
 const parseCommandArgs = require('./lib/parse-command-args.js');
+const promisifySonos = require('./lib/promisify-sonos.js');
+promisifySonos(sonos);
 
 const helpCommand = {
   signature: 'help',
@@ -28,6 +30,7 @@ const helpCommand = {
 const commands = [
   helpCommand,
   require('./commands/status.js'),
+  require('./commands/queue-uri.js'),
   require('./commands/volume.js'),
   require('./commands/volume-percent.js'),
   require('./commands/volume-room-percent.js'),
@@ -51,21 +54,23 @@ const controller = Botkit.slackbot({ debug: JSON.parse(process.env.SONOSBOT_DEBU
 const token = process.env.SONOSBOT_SLACK_TOKEN;
 controller.spawn({ token }).startRTM();
 
+// TODO: Update channel topic whenever the currently playing song changes.
+
 // TODO: group all the players into a single zone on connect and periodically
 // thereafter.
 
-// TODO: reconnect Slack and Sonos if either connection is interrupted.
+// TODO: handle all connection errors and automatically reconnect.
 
 sonos.search(sonosDevice => {
   commands.forEach(command => {
     const { signature, handler } = command;
     const signatureArgRegExp = /\{\w+\}/g;
-    const messageArgRegExp = /(?:(?:\w+)|(?:"[\w\s]+"))/;
+    const messageArgRegExp = /(?:(?:[\w:]+)|(?:"[\w:\s]+"))/;
     const pattern = `^${ signature.replace(signatureArgRegExp, messageArgRegExp.source) }$`;
     // TODO: make contexts conditional on canBeIssuedInPrivate and enforce which
     // channel to listen in.
     const contexts = 'direct_mention,direct_message';
-    
+
     const callback = (bot, message) => {
       const args = parseCommandArgs(message.text, signature);
       handler({

@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "botkit": "~0.6.7",
+    "parse-function": "^5.0.23",
     "sonos": "~0.20.0",
     "sonos-discovery": "github:jishi/node-sonos-discovery"
   },
