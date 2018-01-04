@@ -2,8 +2,8 @@ module.exports = {
   signature: 'status',
   canBeIssuedInPrivate: true,
   description: 'shows service, track, and volume info',
-  handler: ({ bot, message, sonos }) => {
-    const player = sonos.getAnyPlayer();
+  handler: ({ bot, message, sonosDiscovery }) => {
+    const player = sonosDiscovery.getAnyPlayer();
     const { currentTrack } = player.state;
     const { album, artist, stationName, title } = currentTrack;
     const source = stationName || 'Sonos queue';
@@ -12,7 +12,7 @@ module.exports = {
     // from showing if there isn't
     let groupVolume;
     try {
-      groupVolume = sonos.zones[0].coordinator.groupState.volume + '%';
+      groupVolume = sonosDiscovery.zones[0].coordinator.groupState.volume + '%';
     }
     catch(error) {
       groupVolume = '_unknown_';

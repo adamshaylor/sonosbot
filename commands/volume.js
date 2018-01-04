@@ -1,15 +1,15 @@
 module.exports = {
   signature: 'volume',
   description: 'shows group and individual volumes',
-  handler: ({ bot, message, sonos }) => {
+  handler: ({ bot, message, sonosDiscovery }) => {
     let volumes = [
       {
         name: 'Group',
-        amount: sonos.zones[0].coordinator.groupState.volume
+        amount: sonosDiscovery.zones[0].coordinator.groupState.volume
       }
     ];
 
-    volumes = volumes.concat(sonos.players.map(player => {
+    volumes = volumes.concat(sonosDiscovery.players.map(player => {
       return {
         name: player.roomName,
         amount: player.state.volume

@@ -13,7 +13,8 @@
     "url": "git+ssh://git@github.com/adamshaylor/sonosbot.git"
   },
   "dependencies": {
-    "botkit": "^0.6.7",
+    "botkit": "~0.6.7",
+    "sonos": "~0.20.0",
     "sonos-discovery": "github:jishi/node-sonos-discovery"
   },
   "devDependencies": {

@@ -1,5 +1,10 @@
 const Botkit = require('botkit');
-const SonosSystem = require('sonos-discovery');
+
+// These two Sonos libraries provide some overlapping functionality, but there's
+// enough divergence to warrant them both.
+const sonosDiscovery = new (require('sonos-discovery'))();
+const sonos = require('sonos');
+
 const parseCommandArgs = require('./lib/parse-command-args.js');
 
 const helpCommand = {
@@ -46,31 +51,33 @@ const controller = Botkit.slackbot({ debug: JSON.parse(process.env.SONOSBOT_DEBU
 const token = process.env.SONOSBOT_SLACK_TOKEN;
 controller.spawn({ token }).startRTM();
 
-const sonos = new SonosSystem();
-
 // TODO: group all the players into a single zone on connect and periodically
 // thereafter.
 
 // TODO: reconnect Slack and Sonos if either connection is interrupted.
 
-commands.forEach(command => {
-  const { signature, handler } = command;
-  const signatureArgRegExp = /\{\w+\}/g;
-  const messageArgRegExp = /(?:(?:\w+)|(?:"[\w\s]+"))/;
-  const pattern = `^${ signature.replace(signatureArgRegExp, messageArgRegExp.source) }$`;
-  // TODO: make contexts conditional on canBeIssuedInPrivate and enforce which
-  // channel to listen in.
-  const contexts = 'direct_mention,direct_message';
-  const callback = (bot, message) => {
-    const args = parseCommandArgs(message.text, signature);
-    handler({
-      args,
-      bot,
-      controller,
-      message,
-      sonos
-    });
-  };
+sonos.search(sonosDevice => {
+  commands.forEach(command => {
+    const { signature, handler } = command;
+    const signatureArgRegExp = /\{\w+\}/g;
+    const messageArgRegExp = /(?:(?:\w+)|(?:"[\w\s]+"))/;
+    const pattern = `^${ signature.replace(signatureArgRegExp, messageArgRegExp.source) }$`;
+    // TODO: make contexts conditional on canBeIssuedInPrivate and enforce which
+    // channel to listen in.
+    const contexts = 'direct_mention,direct_message';
+    
+    const callback = (bot, message) => {
+      const args = parseCommandArgs(message.text, signature);
+      handler({
+        args,
+        bot,
+        controller,
+        message,
+        sonosDevice,
+        sonosDiscovery
+      });
+    };
 
-  controller.hears([ pattern ], contexts, callback);
+    controller.hears([ pattern ], contexts, callback);
+  });
 });
