@@ -1,9 +1,5 @@
 const Botkit = require('botkit');
-
-// These two Sonos libraries provide some overlapping functionality, but there's
-// enough divergence to warrant them both.
 const sonosDiscovery = new (require('sonos-discovery'))();
-const sonos = require('sonos');
 
 const parseCommandArgs = require('./lib/parse-command-args.js');
 
@@ -65,27 +61,24 @@ controller.spawn({ token }).startRTM();
 
 // TODO: handle all connection errors and automatically reconnect.
 
-sonos.search(sonosDevice => {
-  commands.forEach(command => {
-    const { signature, handler } = command;
-    const signatureArgRegExp = /\{\w+\}/g;
-    const messageArgRegExp = /(?:\S+|".+")/;
-    const pattern = new RegExp(`^${ signature.replace(signatureArgRegExp, messageArgRegExp.source) }$`, 'ig');
-    // TODO: make contexts conditional on canBeIssuedInPrivate and enforce which
-    // channel to listen in.
-    const contexts = 'direct_mention,direct_message';
+commands.forEach(command => {
+  const { signature, handler } = command;
+  const signatureArgRegExp = /\{\w+\}/g;
+  const messageArgRegExp = /(?:\S+|".+")/;
+  const pattern = new RegExp(`^${ signature.replace(signatureArgRegExp, messageArgRegExp.source) }$`, 'ig');
+  // TODO: make contexts conditional on canBeIssuedInPrivate and enforce which
+  // channel to listen in.
+  const contexts = 'direct_mention,direct_message';
 
-    const callback = (bot, message) => {
-      const args = parseCommandArgs(message.text, signature);
-      handler({
-        args,
-        bot,
-        controller,
-        message,
-        sonosDevice,
-        sonosDiscovery
-      });
-    };
-    controller.hears([ pattern ], contexts, callback);
-  });
+  const callback = (bot, message) => {
+    const args = parseCommandArgs(message.text, signature);
+    handler({
+      args,
+      bot,
+      controller,
+      message,
+      sonosDiscovery
+    });
+  };
+  controller.hears([ pattern ], contexts, callback);
 });

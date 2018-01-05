@@ -5,7 +5,7 @@ module.exports = {
   canBeIssuedPrivately: true,
   contexts: [ 'direct_mention', 'direct_message' ],
   description: 'show debugging info.',
-  handler: ({ bot, message, sonosDevice, sonosDiscovery }) => {
+  handler: ({ bot, message, sonosDiscovery }) => {
     const sonosBotEnv = Object.keys(process.env).reduce((sonosBotEnv, envVar) => {
       if (/^SONOSBOT_/.test(envVar)) {
         sonosBotEnv[envVar] = process.env[envVar];
@@ -14,10 +14,7 @@ module.exports = {
     }, {});
 
     const response =
-`*sonos device address*
-\`${ sonosDevice.host }\`
-
-*sonosbot host address*
+`*sonosbot host address*
 node hostname: \`${ os.hostname() }\`
 sonos-discovery origin: \`${ sonosDiscovery.localEndpoint }\`
 
