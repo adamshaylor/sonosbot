@@ -1,5 +1,6 @@
 module.exports = {
   signature: 'volume',
+  canBeIssuedInPrivate: true,
   description: 'show group and individual volumes.',
   handler: ({ bot, message, sonosDiscovery }) => {
     let volumes = [
@@ -20,6 +21,6 @@ module.exports = {
       return responses.concat(`*${ volume.name }*\n${ volume.amount }%`);
     }, []).join('\n\n');
 
-    bot.reply(message, response);
+    bot.whisper(message, response);
   }
 };

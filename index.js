@@ -21,7 +21,7 @@ const helpCommand = {
       .concat(`\nMost of these commands have to be issued in the #${ process.env.SONOSBOT_SLACK_CHANNEL } channel.`)
       .join('\n');
 
-    bot.reply(message, response);
+    bot.whisper(message, response);
   }
 };
 
@@ -33,6 +33,9 @@ const commands = [
   require('./commands/volume-room-percent.js'),
   require('./commands/queue.js'),
   require('./commands/queue-uri.js'),
+  require('./commands/play.js'),
+  require('./commands/pause.js'),
+  require('./commands/stop.js'),
   require('./commands/next.js'),
   require('./commands/previous.js'),
   require('./commands/debug.js')

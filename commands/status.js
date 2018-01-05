@@ -23,6 +23,6 @@ ${ album || '_none_' }`;
 
     // TODO: Add vote stats (up, down, net, threshold)
 
-    bot.reply(message, response);
+    bot.whisper(message, response);
   }
 };
