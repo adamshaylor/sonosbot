@@ -1,6 +1,6 @@
 module.exports = {
   signature: 'volume',
-  description: 'shows group and individual volumes',
+  description: 'show group and individual volumes.',
   handler: ({ bot, message, sonosDiscovery }) => {
     let volumes = [
       {

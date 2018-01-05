@@ -3,7 +3,7 @@ const os = require('os');
 module.exports = {
   signature: 'debug',
   contexts: [ 'direct_mention', 'direct_message' ],
-  description: 'shows debugging info',
+  description: 'show debugging info.',
   handler: ({ bot, message, sonosDevice, sonosDiscovery }) => {
     const sonosBotEnv = Object.keys(process.env).reduce((sonosBotEnv, envVar) => {
       if (/^SONOSBOT_/.test(envVar)) {
