@@ -1,6 +1,6 @@
 module.exports = {
   signature: 'status',
-  canBeIssuedInPrivate: true,
+  canBeIssuedPrivately: true,
   description: 'show service, track, and volume info.',
   handler: ({ bot, message, sonosDiscovery }) => {
     const player = sonosDiscovery.getAnyPlayer();
@@ -23,6 +23,6 @@ ${ album || '_none_' }`;
 
     // TODO: Add vote stats (up, down, net, threshold)
 
-    bot.whisper(message, response);
+    bot.reply(message, response);
   }
 };

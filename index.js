@@ -9,7 +9,7 @@ const parseCommandArgs = require('./lib/parse-command-args.js');
 
 const helpCommand = {
   signature: 'help',
-  canBeIssuedInPrivate: true,
+  canBeIssuedPrivately: true,
   description: 'list sonosbot commands.',
   handler: ({ bot, message }) => {
     const commandDescriptions = commands.map(command => {
@@ -21,7 +21,7 @@ const helpCommand = {
       .concat(`\nMost of these commands have to be issued in the #${ process.env.SONOSBOT_SLACK_CHANNEL } channel.`)
       .join('\n');
 
-    bot.whisper(message, response);
+    bot.reply(message, response);
   }
 };
 
@@ -86,7 +86,6 @@ sonos.search(sonosDevice => {
         sonosDiscovery
       });
     };
-
     controller.hears([ pattern ], contexts, callback);
   });
 });

@@ -2,6 +2,7 @@ const reactToPromise = require('../lib/react-to-promise.js');
 
 module.exports = {
   signature: 'play',
+  canBeIssuedPrivately: false,
   description: 'resume playback.',
   handler: ({ bot, message, sonosDiscovery }) => {
     const promise = sonosDiscovery.zones[0].coordinator.play();

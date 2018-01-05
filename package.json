@@ -16,9 +16,13 @@
     "botkit": "~0.6.7",
     "fn-args": "^3.0.0",
     "sonos": "~0.20.0",
-    "sonos-discovery": "github:jishi/node-sonos-discovery"
+    "sonos-discovery": "github:jishi/node-sonos-discovery#v1.6.0"
   },
   "devDependencies": {
     "eslint": "^4.14.0"
+  },
+  "engines": {
+    "node": "^6.11.4",
+    "npm": "^3.10.10"
   }
 }
