@@ -1,6 +1,5 @@
 const Botkit = require('botkit');
 const sonosDiscovery = new (require('sonos-discovery'))();
-
 const parseCommandArgs = require('./lib/parse-command-args.js');
 
 const helpCommand = {
@@ -61,8 +60,6 @@ const controller = Botkit.slackbot({ debug: JSON.parse(process.env.SONOSBOT_DEBU
 const token = process.env.SONOSBOT_SLACK_TOKEN;
 controller.spawn({ token }).startRTM();
 
-// TODO: Update channel topic whenever the currently playing song changes.
-
 // TODO: group all the players into a single zone on connect and periodically
 // thereafter.
 
@@ -88,4 +85,10 @@ commands.forEach(command => {
     });
   };
   controller.hears([ pattern ], contexts, callback);
+});
+
+sonosDiscovery.getAnyPlayer().on('last-change', function onLastChange() {
+  console.log('last-change arguments:', arguments);
+  console.log('last-change this:', this);
+  // TODO: Post track updates and listen for reactions
 });
