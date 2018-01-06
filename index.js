@@ -14,7 +14,7 @@ const helpCommand = {
 
     const response = [ `Here’s what I can do:\n` ]
       .concat(commandDescriptions)
-      .concat(`\nMost of these commands have to be issued in the #${ process.env.SONOSBOT_SLACK_CHANNEL } channel.`)
+      .concat(`\nCommands that affect what’s playing on the Sonos have to be issued in the #${ process.env.SONOSBOT_SLACK_CHANNEL } channel for me to respond to them. (No secret pirate DJs, please.) You can send some commands (like *help*) to me as a direct message.`)
       .join('\n');
 
     bot.reply(message, response);
@@ -29,11 +29,18 @@ const commands = [
   require('./commands/volume-room-percent.js'),
   require('./commands/queue.js'),
   require('./commands/queue-uri.js'),
+  require('./commands/clear-queue.js'),
   require('./commands/play.js'),
   require('./commands/pause.js'),
   require('./commands/stop.js'),
   require('./commands/next.js'),
   require('./commands/previous.js'),
+  require('./commands/radio-spotify.js'),
+  require('./commands/radio-tunein.js'),
+  require('./commands/shuffle-on.js'),
+  require('./commands/shuffle-off.js'),
+  require('./commands/repeat-on.js'),
+  require('./commands/repeat-off.js'),
   require('./commands/debug.js')
 ];
 

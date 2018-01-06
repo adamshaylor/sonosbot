@@ -1,11 +1,11 @@
 const reactToPromise = require('../lib/react-to-promise.js');
 
 module.exports = {
-  signature: 'stop',
+  signature: 'repeat off',
   canBeIssuedPrivately: false,
-  description: 'stop playback and reset the queue position to the beginning.',
+  description: 'turn repeat mode off.',
   handler: ({ bot, message, sonosDiscovery }) => {
-    const promise = sonosDiscovery.zones[0].coordinator.stop();
+    const promise = sonosDiscovery.zones[0].coordinator.repeat(false);
     reactToPromise({ promise, bot, message });
   }
 };
