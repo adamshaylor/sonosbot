@@ -72,7 +72,10 @@ commands.forEach(command => {
   const pattern = new RegExp(`^${ signature.replace(signatureArgRegExp, messageArgRegExp.source) }$`, 'ig');
   // TODO: make contexts conditional on canBeIssuedInPrivate and enforce which
   // channel to listen in.
-  const contexts = 'direct_mention,direct_message';
+  const contexts = [
+    'direct_mention',
+    'direct_message'
+  ];
 
   const callback = (bot, message) => {
     const args = parseCommandArgs(message.text, signature);
@@ -91,4 +94,9 @@ sonosDiscovery.getAnyPlayer().on('last-change', function onLastChange() {
   console.log('last-change arguments:', arguments);
   console.log('last-change this:', this);
   // TODO: Post track updates and listen for reactions
+});
+
+controller.on('reaction_added', function onReactionAdded() {
+  console.log('reaction_added arguments:', arguments);
+  console.log('reaction_added this:', this);
 });
