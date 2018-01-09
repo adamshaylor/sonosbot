@@ -90,13 +90,29 @@ commands.forEach(command => {
   controller.hears([ pattern ], contexts, callback);
 });
 
-sonosDiscovery.getAnyPlayer().on('last-change', function onLastChange() {
-  console.log('last-change arguments:', arguments);
-  console.log('last-change this:', this);
-  // TODO: Post track updates and listen for reactions
+// Treat the first topology-change event as a ready event
+sonosDiscovery.once('topology-change', () => {
+  console.log('topology-change event fired. Setting up last-change listener.');
+  // We know last-change events are being fired because setting a breakpoint on
+  // the emit() works, we just don’t know where the emitter lives. Wherever it
+  // is, it isn't here.
+  sonosDiscovery.zones[0].coordinator.on('last-change', function onLastChange() {
+    console.log('last-change arguments:', arguments);
+    console.log('last-change this:', this);
+    // TODO: Post track updates and listen for reactions
+  });
 });
 
-controller.on('reaction_added', function onReactionAdded() {
-  console.log('reaction_added arguments:', arguments);
-  console.log('reaction_added this:', this);
+controller.on('reaction_added', (bot, message) => {
+  bot.api.reactions.get({
+    timestamp: message.item.ts,
+    channel: message.item.channel,
+  }, (error, response) => {
+    if (error) {
+      console.error('reactions.get() error:', error);
+    }
+    else {
+      console.log('reactions.get() response:', response);
+    }
+  });
 });
