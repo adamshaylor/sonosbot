@@ -3,8 +3,8 @@ module.exports = {
   canBeIssuedPrivately: true,
   description: 'show service, track, and volume info.',
   handler: ({ bot, message, sonosDiscovery }) => {
-    const player = sonosDiscovery.getAnyPlayer();
-    const { currentTrack } = player.state;
+    const coordinator = sonosDiscovery.zones[0].coordinator;
+    const { currentTrack } = coordinator.state;
     const { album, artist, stationName, title } = currentTrack;
     const source = stationName || 'Sonos queue';
 

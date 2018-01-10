@@ -1,5 +1,6 @@
 const Botkit = require('botkit');
 const sonosDiscovery = new (require('sonos-discovery'))();
+const trackState = require('./lib/create-track-state.js')(sonosDiscovery);
 const parseCommandArgs = require('./lib/parse-command-args.js');
 
 const helpCommand = {
@@ -58,7 +59,31 @@ envRequirements.forEach(envVar => {
 
 const controller = Botkit.slackbot({ debug: JSON.parse(process.env.SONOSBOT_DEBUG || 'false') });
 const token = process.env.SONOSBOT_SLACK_TOKEN;
-controller.spawn({ token }).startRTM();
+
+const botPromise = new Promise((resolve, reject) => {
+  controller
+    .spawn({ token })
+    .startRTM((error, bot) => error ? reject(error) : resolve(bot));
+});
+
+const channelsPromise = botPromise.then(bot => {
+  return new Promise((resolve, reject) => {
+    bot.api.channels.list({}, (error, response) => error ? reject(error) : resolve(response.channels));
+  });
+});
+
+const groupsPromise = botPromise.then(bot => {
+  return new Promise((resolve, reject) => {
+    bot.api.groups.list({}, (error, response) => error ? reject(error) : resolve(response.groups));
+  });
+});
+
+const channelPromise = Promise.all([ channelsPromise, groupsPromise ]).then(([ channels, groups ]) => {
+  const { SONOSBOT_SLACK_CHANNEL } = process.env;
+  const matchingChannel = channels.find(channel => channel.name === SONOSBOT_SLACK_CHANNEL);
+  const matchingGroup = groups.find(group => group.name === SONOSBOT_SLACK_CHANNEL);
+  return matchingChannel || matchingGroup || Promise.reject(`Channel "${ process.env.SONOSBOT_SLACK_CHANNEL }" not found`);
+});
 
 // TODO: group all the players into a single zone on connect and periodically
 // thereafter.
@@ -90,16 +115,10 @@ commands.forEach(command => {
   controller.hears([ pattern ], contexts, callback);
 });
 
-// Treat the first topology-change event as a ready event
-sonosDiscovery.once('topology-change', () => {
-  console.log('topology-change event fired. Setting up last-change listener.');
-  // We know last-change events are being fired because setting a breakpoint on
-  // the emit() works, we just don’t know where the emitter lives. Wherever it
-  // is, it isn't here.
-  sonosDiscovery.zones[0].coordinator.on('last-change', function onLastChange() {
-    console.log('last-change arguments:', arguments);
-    console.log('last-change this:', this);
-    // TODO: Post track updates and listen for reactions
+trackState.onTrackChange(newTrack => {
+  console.log('onTrackChange():', newTrack);
+  Promise.all([ botPromise, channelPromise ]).then(([ bot, channel ]) => {
+    console.log(channel, bot);
   });
 });
 
