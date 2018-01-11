@@ -116,9 +116,17 @@ commands.forEach(command => {
 });
 
 trackState.onTrackChange(newTrack => {
-  console.log('onTrackChange():', newTrack);
+  const { title, artist } = newTrack;
   Promise.all([ botPromise, channelPromise ]).then(([ bot, channel ]) => {
-    console.log(channel, bot);
+    bot.say(
+      {
+        text: `Now playing ${ title || '_unknown_' } by ${ artist || '_unknown_' }`,
+        channel: channel.id
+      },
+      (error, response) => {
+        console.log(error, response);
+      }
+    );
   });
 });
 
