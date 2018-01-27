@@ -2,6 +2,8 @@ const Botkit = require('botkit');
 const sonosDiscovery = new (require('sonos-discovery'))();
 const trackState = require('./lib/create-track-state.js')(sonosDiscovery);
 const parseCommandArgs = require('./lib/parse-command-args.js');
+const onTrackChange = require('./lib/on-track-change.js');
+const onReaction = require('./lib/on-reaction.js');
 
 const helpCommand = {
   signature: 'help',
@@ -116,30 +118,11 @@ commands.forEach(command => {
 });
 
 trackState.onTrackChange(newTrack => {
-  const { title, artist } = newTrack;
   Promise.all([ botPromise, channelPromise ]).then(([ bot, channel ]) => {
-    bot.say(
-      {
-        text: `Now playing ${ title || '_unknown_' } by ${ artist || '_unknown_' }`,
-        channel: channel.id
-      },
-      (error, response) => {
-        console.log(error, response);
-      }
-    );
+    onTrackChange(newTrack, trackState, bot, channel);
   });
 });
 
-controller.on('reaction_added', (bot, message) => {
-  bot.api.reactions.get({
-    timestamp: message.item.ts,
-    channel: message.item.channel,
-  }, (error, response) => {
-    if (error) {
-      console.error('reactions.get() error:', error);
-    }
-    else {
-      console.log('reactions.get() response:', response);
-    }
-  });
+controller.on(['reaction_added', 'reaction_removed'], (bot, message) => {
+  onReaction(bot, message, trackState);
 });

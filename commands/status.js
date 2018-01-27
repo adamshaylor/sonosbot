@@ -4,13 +4,16 @@ module.exports = {
   description: 'show service, track, and volume info.',
   handler: ({ bot, message, sonosDiscovery }) => {
     const coordinator = sonosDiscovery.zones[0].coordinator;
-    const { currentTrack } = coordinator.state;
+    const { playbackState, currentTrack } = coordinator.state;
     const { album, artist, stationName, title } = currentTrack;
     const source = stationName || 'Sonos queue';
 
     const response =
-`*Source*
-${source}
+`*Playback*
+${ playbackState.toLowerCase() }
+
+*Source*
+${ source }
 
 *Track*
 ${ title || '_none_' }
