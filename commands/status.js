@@ -2,11 +2,12 @@ module.exports = {
   signature: 'status',
   canBeIssuedPrivately: true,
   description: 'show service, track, and volume info.',
-  handler: ({ bot, message, sonosDiscovery }) => {
+  handler: ({ bot, message, sonosDiscovery, trackState }) => {
     const coordinator = sonosDiscovery.zones[0].coordinator;
     const { playbackState, currentTrack } = coordinator.state;
     const { album, artist, stationName, title } = currentTrack;
     const source = stationName || 'Sonos queue';
+    const { netVote, downvoteThreshold } = trackState;
 
     const response =
 `*Playback*
@@ -22,9 +23,14 @@ ${ title || '_none_' }
 ${ artist || '_none_' }
 
 *Album*
-${ album || '_none_' }`;
+${ album || '_none_' }
 
-    // TODO: Add vote stats (up, down, net, threshold)
+*Net vote (thumbs up / down)*
+${ netVote }
+
+*Downvote threshold*
+${ downvoteThreshold }
+`;
 
     bot.reply(message, response);
   }

@@ -1,6 +1,6 @@
 const Botkit = require('botkit');
 const sonosDiscovery = new (require('sonos-discovery'))();
-const trackState = require('./lib/create-track-state.js')(sonosDiscovery);
+const createTrackState = require('./lib/create-track-state.js');
 const parseCommandArgs = require('./lib/parse-command-args.js');
 const onTrackChange = require('./lib/on-track-change.js');
 const onReaction = require('./lib/on-reaction.js');
@@ -87,10 +87,13 @@ const channelPromise = Promise.all([ channelsPromise, groupsPromise ]).then(([ c
   return matchingChannel || matchingGroup || Promise.reject(`Channel "${ process.env.SONOSBOT_SLACK_CHANNEL }" not found`);
 });
 
-// TODO: group all the players into a single zone on connect and periodically
-// thereafter.
+// TODO: either a) group all the players into a single zone on connect and
+// periodically thereafter, or b) require a zone name as an env variable.
 
 // TODO: handle all connection errors and automatically reconnect.
+
+const { SONOSBOT_DOWNVOTE_THRESHOLD } = process.env;
+const trackState = createTrackState(sonosDiscovery, SONOSBOT_DOWNVOTE_THRESHOLD);
 
 commands.forEach(command => {
   const { signature, handler } = command;
@@ -111,7 +114,8 @@ commands.forEach(command => {
       bot,
       controller,
       message,
-      sonosDiscovery
+      sonosDiscovery,
+      trackState
     });
   };
   controller.hears([ pattern ], contexts, callback);
@@ -124,5 +128,5 @@ trackState.onTrackChange(newTrack => {
 });
 
 controller.on(['reaction_added', 'reaction_removed'], (bot, message) => {
-  onReaction(bot, message, trackState);
+  onReaction(bot, message, trackState, sonosDiscovery);
 });
