@@ -1,5 +1,5 @@
 const Botkit = require('botkit');
-const sonosDiscovery = new (require('sonos-discovery'))();
+const SonosDiscovery = require('sonos-discovery');
 const createTrackState = require('./lib/create-track-state.js');
 const parseCommandArgs = require('./lib/parse-command-args.js');
 const onTrackChange = require('./lib/on-track-change.js');
@@ -90,22 +90,35 @@ const channelPromise = Promise.all([ channelsPromise, groupsPromise ]).then(([ c
 // TODO: either a) group all the players into a single zone on connect and
 // periodically thereafter, or b) require a zone name as an env variable.
 
-// TODO: handle Sonos connection errors and automatically reconnect.
+let sonosDiscovery;
+let trackState;
+const connectSonos = () => {
+  sonosDiscovery = new SonosDiscovery();
 
-const { SONOSBOT_DOWNVOTE_THRESHOLD } = process.env;
-const trackState = createTrackState(sonosDiscovery, SONOSBOT_DOWNVOTE_THRESHOLD);
+  sonosDiscovery.on('dead', () => {
+    console.log('Sonos connection died. Attempting to reconnect with a new SonosDiscovery instance...');
+    connectSonos();
+  });
+
+  const { SONOSBOT_DOWNVOTE_THRESHOLD } = process.env;
+  trackState = createTrackState(sonosDiscovery, SONOSBOT_DOWNVOTE_THRESHOLD);
+  trackState.onTrackChange(newTrack => {
+    Promise.all([ botPromise, channelPromise ]).then(([ bot, channel ]) => {
+      onTrackChange(newTrack, trackState, bot, channel);
+    });
+  });
+};
+connectSonos();
 
 commands.forEach(command => {
-  const { signature, handler } = command;
+  const { signature, handler, canBeIssuedPrivately } = command;
   const signatureArgRegExp = /\{\w+\}/g;
   const messageArgRegExp = /(?:\S+|".+")/;
   const pattern = new RegExp(`^${ signature.replace(signatureArgRegExp, messageArgRegExp.source) }$`, 'ig');
-  // TODO: make contexts conditional on canBeIssuedInPrivate and enforce which
-  // channel to listen in.
-  const contexts = [
-    'direct_mention',
-    'direct_message'
-  ];
+
+  const contexts = canBeIssuedPrivately ?
+    [ 'direct_mention', 'direct_message' ] :
+    [ 'direct_mention' ];
 
   const callback = (bot, message) => {
     const args = parseCommandArgs(message.text, signature);
@@ -119,12 +132,6 @@ commands.forEach(command => {
     });
   };
   controller.hears([ pattern ], contexts, callback);
-});
-
-trackState.onTrackChange(newTrack => {
-  Promise.all([ botPromise, channelPromise ]).then(([ bot, channel ]) => {
-    onTrackChange(newTrack, trackState, bot, channel);
-  });
 });
 
 controller.on(['reaction_added', 'reaction_removed'], (bot, message) => {
