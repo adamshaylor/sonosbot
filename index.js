@@ -90,7 +90,7 @@ const channelPromise = Promise.all([ channelsPromise, groupsPromise ]).then(([ c
 // TODO: either a) group all the players into a single zone on connect and
 // periodically thereafter, or b) require a zone name as an env variable.
 
-// TODO: handle all connection errors and automatically reconnect.
+// TODO: handle Sonos connection errors and automatically reconnect.
 
 const { SONOSBOT_DOWNVOTE_THRESHOLD } = process.env;
 const trackState = createTrackState(sonosDiscovery, SONOSBOT_DOWNVOTE_THRESHOLD);
@@ -129,4 +129,16 @@ trackState.onTrackChange(newTrack => {
 
 controller.on(['reaction_added', 'reaction_removed'], (bot, message) => {
   onReaction(bot, message, trackState, sonosDiscovery);
+});
+
+controller.on('rtm_close', bot => {
+  const reconnectRtm = () => {
+    console.log('Slack RTM disconnected. Attempting to reconnect...');
+    bot.startRTM(error => {
+      if (error) {
+        setTimeout(reconnectRtm, 10000);
+      }
+    });
+  };
+  reconnectRtm();
 });
